@@ -1,0 +1,122 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load dataset
+file_path = r"C:\Users\Rayyan Zafar\Downloads\house-prices-advanced-regression-techniques\train.csv"
+ds = pd.read_csv(file_path)
+
+# Select features and target
+features = ["GrLivArea", "BedroomAbvGr", "FullBath"]
+X = ds[features]
+y = ds["SalePrice"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+
+# Evaluate model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("\nModel Evaluation")
+print("----------------")
+print(f"Mean Squared Error : {mse:.2f}")
+print(f"R-Squared Score    : {r2:.4f}\n")
+
+# 1. Actual vs Predicted Plot
+plt.figure(figsize=(8, 5))
+plt.scatter(y_test, y_pred, edgecolor='k', alpha=0.7)
+plt.xlabel("Actual SalePrice")
+plt.ylabel("Predicted SalePrice")
+plt.title("1. Actual vs Predicted SalePrice")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 2. Residual Plot
+residuals = y_test - y_pred
+plt.figure(figsize=(8, 5))
+plt.scatter(y_pred, residuals, alpha=0.7, edgecolor='k')
+plt.axhline(0, color='red', linestyle='--')
+plt.xlabel("Predicted SalePrice")
+plt.ylabel("Residuals")
+plt.title("2. Residuals vs Predicted SalePrice")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 3. Histogram of Residuals
+plt.figure(figsize=(8, 5))
+plt.hist(residuals, bins=30, edgecolor='k', alpha=0.7)
+plt.title("3. Distribution of Residuals")
+plt.xlabel("Residual")
+plt.ylabel("Frequency")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# 4. Sorted Actual vs Predicted Plot
+plt.figure(figsize=(10, 5))
+plt.plot(sorted(y_test.values), label="Actual", color='blue')
+plt.plot(sorted(y_pred), label="Predicted", color='orange')
+plt.xlabel("Samples (Sorted)")
+plt.ylabel("SalePrice")
+plt.title("4. Sorted Actual vs Predicted SalePrice")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# 5. Coefficients Plot
+coefs = pd.Series(model.coef_, index=features)
+plt.figure(figsize=(6, 4))
+coefs.plot(kind='barh', color='teal', edgecolor='black')
+plt.title("5. Linear Regression Coefficients")
+plt.xlabel("Coefficient Value")
+plt.tight_layout()
+plt.show()
+
+# 6. Pair Plot of Features and Target
+sns.pairplot(ds[features + ["SalePrice"]])
+plt.suptitle("6. Pair Plot of Selected Features and SalePrice", y=1.02)
+plt.show()
+
+# 7. Feature vs SalePrice Scatter Plots
+for feature in features:
+    plt.figure(figsize=(6, 4))
+    plt.scatter(ds[feature], ds["SalePrice"], alpha=0.6, edgecolor='k')
+    plt.xlabel(feature)
+    plt.ylabel("SalePrice")
+    plt.title(f"7. {feature} vs SalePrice")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+# 8. Prediction for a New House
+new_data = pd.DataFrame({'GrLivArea': [2000], 'BedroomAbvGr': [3], 'FullBath': [2]})
+predicted_price = model.predict(new_data)
+
+print("New House Price Prediction")
+print("--------------------------")
+print(f"Predicted SalePrice: ${predicted_price[0]:,.2f}")
+
+plt.figure(figsize=(8, 5))
+plt.scatter(X_test["GrLivArea"], y_test, alpha=0.5, label="Actual")
+plt.scatter(2000, predicted_price, color='red', s=100, label="New House Prediction", marker='X')
+plt.xlabel("GrLivArea")
+plt.ylabel("SalePrice")
+plt.title("8. GrLivArea vs SalePrice with New Prediction")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
